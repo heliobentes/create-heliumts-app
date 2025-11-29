@@ -1,0 +1,40 @@
+{
+  "name": "create-heliumts-app",
+  "version": "1.0.0",
+  "description": "Create HeliumTS apps with one command",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "create-heliumts-app": "./bin/index.js"
+  },
+  "scripts": {
+    "test": "node bin/index.js test-app"
+  },
+  "keywords": [
+    "heliumts",
+    "react",
+    "vite",
+    "fullstack",
+    "typescript",
+    "cli",
+    "create-app"
+  ],
+  "author": "Helio Bentes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heliobentes/create-heliumts-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/heliobentes/create-heliumts-app/issues"
+  },
+  "homepage": "https://github.com/heliobentes/create-heliumts-app#readme",
+  "files": [
+    "bin",
+    "src",
+    "templates"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
