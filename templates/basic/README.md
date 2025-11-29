@@ -1,16 +1,44 @@
-# Basic HeliumTS Template
+# HeliumTS App
 
-This folder contains the basic HeliumTS template without Tailwind CSS.
+This is a [HeliumTS](https://heliumts.com) project bootstrapped with `create-heliumts-app`.
 
-## Template Contents
+## Getting Started
 
-Place your basic HeliumTS project files here:
+First, install the dependencies:
 
-- `package.json` - Project dependencies
-- `vite.config.ts` - Vite configuration with HeliumTS plugin
-- `tsconfig.json` - TypeScript configuration
-- `index.html` - HTML entry point
-- `src/App.tsx` - App shell component
-- `src/pages/` - Pages directory
-- `src/server/` - Server-side code
-- `src/components/` - React components
+```bash
+npm install
+# or
+yarn
+# or
+pnpm install
+```
+
+Then, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
+
+You can start editing the page by modifying `src/pages/index.tsx`. The page auto-updates as you edit the file.
+
+## Project Structure
+
+- `src/pages` - File-based routing for your application.
+- `src/server` - Server-side logic and RPC functions.
+- `src/components` - React components.
+- `helium.config.ts` - HeliumTS configuration.
+
+## Learn More
+
+To learn more about HeliumTS, take a look at the following resources:
+
+- [HeliumTS Documentation](https://heliumts.com/docs) - learn about HeliumTS features and API.
+- [HeliumTS GitHub](https://github.com/heliobentes/heliumts) - check out the source code and contribute.
+

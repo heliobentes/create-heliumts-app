@@ -1,0 +1,181 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #f1f1f3;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #2fca9e;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #218855;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+#root {
+  flex-grow: 1;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Welcome Page Styles */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+.logo-wrapper a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+}
+.logo-wrapper a:hover h1 {
+  text-decoration: underline;
+}
+.logo-wrapper a h1 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.task-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+.task {
+  padding: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  background-color: #fff;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(250px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 800px;
+  margin-top: 2rem;
+  justify-content: center;
+  place-items: center;
+}
+
+.feature-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+@media (prefers-color-scheme: light) {
+  .feature-card {
+    background-color: #f9f9f9;
+    border-color: #eee;
+  }
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Helium Logo CSS implementation of Tailwind classes */
+.helium-logo {
+  background-color: #14b8a6; /* bg-teal-500 */
+  border-radius: 0.75rem; /* rounded-xl */
+  width: 3rem; /* size-12 */
+  height: 3rem; /* size-12 */
+  padding: 0.1875rem; /* p-0.75 */
+  border: 1px solid #0f766e; /* border border-teal-700 */
+  border-bottom-width: 4px; /* border-b-4 */
+  border-right-width: 4px; /* border-r-4 */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.helium-logo-inner {
+  border-radius: 0.5rem; /* rounded-lg */
+  border: 1px solid rgba(255, 255, 255, 0.5); /* border-white/50 */
+  display: flex; /* flex */
+  align-items: center; /* items-center */
+  justify-content: center; /* justify-center */
+  color: white; /* text-white */
+  font-weight: 600; /* font-semibold */
+  font-size: 1.125rem; /* text-lg */
+  height: 100%; /* h-full */
+  width: 100%; /* w-full */
+}
