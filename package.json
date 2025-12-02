@@ -1,6 +1,6 @@
 {
   "name": "create-heliumts-app",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "Create HeliumTS apps with one command",
   "type": "module",
   "main": "src/index.js",
