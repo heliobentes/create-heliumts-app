@@ -4,6 +4,5 @@ templates/*/package-lock.json
 
 # Development files
 .git
-.gitignore
 .DS_Store
 *.log
