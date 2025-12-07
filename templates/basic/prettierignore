@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build directories
+.next/
+out/
+build/
+dist/
+
+# Public assets
+public/
+
+# Generated files
+.vercel
+.env*.local
+
+# Cache
+.eslintcache
+
+# Coverage reports
+coverage/
+
+# Package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

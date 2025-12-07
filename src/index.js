@@ -54,6 +54,13 @@ function askQuestion(rl, question) {
     });
 }
 
+// Files that need to be renamed from 'name' to '.name' (npm doesn't include dotfiles in packages)
+const DOTFILE_RENAMES = {
+    'gitignore': '.gitignore',
+    'prettierrc': '.prettierrc',
+    'prettierignore': '.prettierignore'
+};
+
 function copyDirectory(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
     
@@ -61,7 +68,8 @@ function copyDirectory(src, dest) {
     
     for (const entry of entries) {
         const srcPath = path.join(src, entry.name);
-        const destPath = path.join(dest, entry.name);
+        const destName = DOTFILE_RENAMES[entry.name] || entry.name;
+        const destPath = path.join(dest, destName);
         
         if (entry.isDirectory()) {
             copyDirectory(srcPath, destPath);
