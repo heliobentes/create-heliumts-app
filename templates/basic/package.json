@@ -9,7 +9,7 @@
     "start": "helium start"
   },
   "dependencies": {
-    "heliumts": "^0.5.8",
+    "heliumts": "^0.5.11",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
