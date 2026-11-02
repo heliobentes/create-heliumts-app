@@ -4,7 +4,7 @@ This is a [HeliumTS](https://heliumts.com) project bootstrapped with `create-hel
 
 ## Requirements
 
-Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.10.1 and Vite 7.3.7 or later within Vite 7.
+Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.10.2 and Vite 7.3.7 or later within Vite 7.
 
 ## Getting Started
 
