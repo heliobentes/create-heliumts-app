@@ -1,9 +1,13 @@
 import HeliumLogo from "../components/HeliumLogo";
-import { useFetch } from "heliumts/client";
+import { Link, useFetch } from "heliumts/client";
 import { getTasks } from "heliumts/server";
 
 export default function Home() {
-  const { data: tasks, isLoading, error } = useFetch(getTasks, { status: "pending" });
+  const {
+    data: tasks,
+    isLoading,
+    error,
+  } = useFetch(getTasks, { status: "pending" });
 
   return (
     <div className="max-w-5xl mx-auto p-8 text-center flex flex-col items-center gap-8">
@@ -55,8 +59,8 @@ export default function Home() {
         <div className="p-6 rounded-xl bg-white border border-gray-300 text-left hover:border-teal-500/50 transition-colors">
           <h3 className="text-xl font-semibold mb-2">🔒 Type Safe</h3>
           <p className="opacity-80 text-sm">
-            Typed server methods and generated client declarations keep
-            requests and responses in sync.
+            Typed server methods and generated client declarations keep requests
+            and responses in sync.
           </p>
         </div>
         <div className="p-6 rounded-xl bg-white border border-gray-300 text-left hover:border-teal-500/50 transition-colors">
@@ -83,6 +87,9 @@ export default function Home() {
         >
           https://heliumts.com
         </a>
+      </p>
+      <p>
+        <Link href="/streaming">Try typed HTTP streaming</Link>
       </p>
     </div>
   );

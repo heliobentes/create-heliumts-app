@@ -4,7 +4,7 @@ This is a [HeliumTS](https://heliumts.com) project bootstrapped with `create-hel
 
 ## Requirements
 
-Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.9.7 and Vite 7.3.7 or later within Vite 7.
+Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.10.1 and Vite 7.3.7 or later within Vite 7.
 
 ## Getting Started
 
@@ -62,9 +62,13 @@ The matching `src/pages/profile.tsx` starts with `"use ssr";` and receives `name
 
 RPC methods belong in `src/server`. Import their generated stubs from `heliumts/server` in pages, then call `useFetch` for queries or `useCall` for mutations. The Helium CLI refreshes `src/types/heliumts-server.d.ts`; do not edit generated declarations by hand.
 
-For calls in event handlers or other browser code outside hooks, import `callMethod` from `heliumts/client`: `await callMethod(getTasks, { status: "pending" })`. Its result includes `data`, request `stats`, and the transport used. Pass `{ transport: "http" }` or `{ transport: "websocket" }` as the third argument to require one transport for that call. Browser RPC APIs cannot run during SSR or SSG rendering; use `getServerSideProps` for request-time server data.
+For calls in event handlers or browser utilities outside hooks, use `callMethod(getTasks, args)` from `heliumts/client`; its result contains `data` and request `stats`. RPC uses HTTP with MessagePack and automatic batching. Browser RPC APIs do not run during SSR or SSG rendering; use `getServerSideProps` for request-time data.
 
-WebSocket RPC shares a persistent connection. Performance depends on your network, payloads, compression, and hosting proxies; HTTP/2 and HTTP/3 can also reuse connections. Smaller MessagePack payloads do not guarantee faster responses. Compare both transports with your application workload.
+## Streaming
+
+Open `/streaming` for a runnable deterministic example. `src/server/streaming.ts` defines an async generator with `defineMethod`; the page consumes it with `useStreaming`. No provider SDK, API key, or database is required.
+
+The hook exposes typed `chunks`, concatenated string `text`, `isStreaming`, `error`, `stats`, `start(args)`, `cancel()`, and `reset()`. Starting again replaces the previous stream. Cancel and partial failures retain received chunks; reset clears them. Streams are never replayed automatically. The server passes `ctx.signal` into cancellable work.
 
 ## Production
 

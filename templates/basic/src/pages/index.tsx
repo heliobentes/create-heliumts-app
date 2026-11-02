@@ -1,9 +1,13 @@
 import HeliumLogo from "../components/HeliumLogo";
-import { useFetch } from "heliumts/client";
+import { Link, useFetch } from "heliumts/client";
 import { getTasks } from "heliumts/server";
 
 export default function Home() {
-  const { data: tasks, isLoading, error } = useFetch(getTasks, { status: "pending" });
+  const {
+    data: tasks,
+    isLoading,
+    error,
+  } = useFetch(getTasks, { status: "pending" });
 
   return (
     <div>
@@ -46,8 +50,8 @@ export default function Home() {
         <div className="feature-card">
           <h3>🔒 Type Safe</h3>
           <p>
-            Typed server methods and generated client declarations keep
-            requests and responses in sync.
+            Typed server methods and generated client declarations keep requests
+            and responses in sync.
           </p>
         </div>
         <div className="feature-card">
@@ -59,6 +63,10 @@ export default function Home() {
           <p>Call server functions directly from your client components.</p>
         </div>
       </div>
+
+      <p>
+        <Link href="/streaming">Try typed HTTP streaming</Link>
+      </p>
 
       <p className="read-the-docs">
         Click on the Helium logo to learn more or visit{" "}

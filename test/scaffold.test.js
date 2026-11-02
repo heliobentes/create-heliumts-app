@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+const releaseVersion = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const cli = fileURLToPath(new URL('../bin/index.js', import.meta.url));
 
 function temporaryDirectory(context) {
@@ -38,7 +39,7 @@ for (const template of ['basic', 'tailwind']) {
         const manifest = JSON.parse(readFileSync(path.join(target, 'package.json'), 'utf8'));
         const lock = JSON.parse(readFileSync(path.join(target, 'package-lock.json'), 'utf8'));
         assert.equal(manifest.name, 'my-app');
-        assert.equal(manifest.dependencies.heliumts, '^0.9.7');
+        assert.equal(manifest.dependencies.heliumts, `^${releaseVersion}`);
         assert.equal(manifest.devDependencies.vite, '^7.3.7');
         assert.equal(manifest.engines.node, '^20.19.0 || >=22.12.0');
         assert.equal(Boolean(manifest.dependencies.tailwindcss), template === 'tailwind');
@@ -49,7 +50,14 @@ for (const template of ['basic', 'tailwind']) {
         assert.equal(existsSync(path.join(target, '.prettierignore')), true);
         assert.equal(existsSync(path.join(target, 'gitignore')), false);
         assert.equal(existsSync(path.join(target, 'node_modules')), false);
-        assert.match(readFileSync(path.join(target, 'helium.config.ts'), 'utf8'), /trustProxyDepth: 0/);
+        const config = readFileSync(path.join(target, 'helium.config.ts'), 'utf8');
+        assert.match(config, /trustProxyDepth: 0/);
+        assert.match(config, /maxRequestsPerWindow: 200/);
+        assert.ok(JSON.parse(readFileSync(path.join(target, 'tsconfig.app.json'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')).compilerOptions.types.includes('node'));
+        assert.doesNotMatch(config, /transport|autoHttpOnMobile|maxWsPayload|maxConnectionsPerIP|maxMessagesPerWindow/);
+        assert.match(readFileSync(path.join(target, 'src/pages/streaming.tsx'), 'utf8'), /useStreaming\(streamText\)/);
+        assert.match(readFileSync(path.join(target, 'src/server/streaming.ts'), 'utf8'), /defineMethod\(async function\*/);
+        assert.match(readFileSync(path.join(target, 'src/server/streaming.ts'), 'utf8'), /signal: ctx.signal/);
         assert.match(result.stdout, /Skipped dependency installation/);
     });
 }
