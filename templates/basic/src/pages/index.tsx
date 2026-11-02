@@ -37,10 +37,10 @@ export default function Home() {
 
       <div className="features">
         <div className="feature-card">
-          <h3>🚀 Blazing Fast</h3>
+          <h3>🚀 Vite Development</h3>
           <p>
-            Built on Vite for instant server start, lightning fast HMR and
-            snappy server calls.
+            Built on Vite with hot module replacement and an integrated
+            development server.
           </p>
         </div>
         <div className="feature-card">

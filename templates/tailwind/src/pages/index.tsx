@@ -46,10 +46,10 @@ export default function Home() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl mt-8">
         <div className="p-6 rounded-xl bg-white border border-gray-300 text-left hover:border-teal-500/50 transition-colors">
-          <h3 className="text-xl font-semibold mb-2">🚀 Blazing Fast</h3>
+          <h3 className="text-xl font-semibold mb-2">🚀 Vite Development</h3>
           <p className="opacity-80 text-sm">
-            Built on Vite for instant server start, lightning fast HMR and
-            snappy server calls.
+            Built on Vite with hot module replacement and an integrated
+            development server.
           </p>
         </div>
         <div className="p-6 rounded-xl bg-white border border-gray-300 text-left hover:border-teal-500/50 transition-colors">

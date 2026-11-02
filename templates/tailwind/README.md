@@ -4,7 +4,7 @@ This is a [HeliumTS](https://heliumts.com) project bootstrapped with `create-hel
 
 ## Requirements
 
-Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.9.6 and Vite 7.3.7 or later within Vite 7.
+Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.9.7 and Vite 7.3.7 or later within Vite 7.
 
 ## Getting Started
 
@@ -61,6 +61,10 @@ export const getServerSideProps: GetServerSideProps = async (request) => {
 The matching `src/pages/profile.tsx` starts with `"use ssr";` and receives `name` as a prop. Sidecars stay out of the browser bundle. Layouts and `src/App.tsx` wrap browser, SSR, and static pages.
 
 RPC methods belong in `src/server`. Import their generated stubs from `heliumts/server` in pages, then call `useFetch` for queries or `useCall` for mutations. The Helium CLI refreshes `src/types/heliumts-server.d.ts`; do not edit generated declarations by hand.
+
+For calls in event handlers or other browser code outside hooks, import `callMethod` from `heliumts/client`: `await callMethod(getTasks, { status: "pending" })`. Its result includes `data`, request `stats`, and the transport used. Pass `{ transport: "http" }` or `{ transport: "websocket" }` as the third argument to require one transport for that call. Browser RPC APIs cannot run during SSR or SSG rendering; use `getServerSideProps` for request-time server data.
+
+WebSocket RPC shares a persistent connection. Performance depends on your network, payloads, compression, and hosting proxies; HTTP/2 and HTTP/3 can also reuse connections. Smaller MessagePack payloads do not guarantee faster responses. Compare both transports with your application workload.
 
 ## Production
 

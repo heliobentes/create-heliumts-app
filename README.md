@@ -38,7 +38,7 @@ npx create-heliumts-app my-app --no-tailwind
    - `basic` - Standard HeliumTS setup
 3. Automatically runs `npm install` unless `--skip-install` is provided.
 
-Both templates use HeliumTS 0.9.6 and Vite 7.3.7 or later within Vite 7.
+Both templates use HeliumTS 0.9.7 and Vite 7.3.7 or later within Vite 7.
 Existing project files, including dotfiles, are protected from overwrite; `.git` and `.DS_Store` may remain in an otherwise empty directory.
 
 To install with another package manager:

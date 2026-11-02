@@ -38,7 +38,7 @@ for (const template of ['basic', 'tailwind']) {
         const manifest = JSON.parse(readFileSync(path.join(target, 'package.json'), 'utf8'));
         const lock = JSON.parse(readFileSync(path.join(target, 'package-lock.json'), 'utf8'));
         assert.equal(manifest.name, 'my-app');
-        assert.equal(manifest.dependencies.heliumts, '^0.9.6');
+        assert.equal(manifest.dependencies.heliumts, '^0.9.7');
         assert.equal(manifest.devDependencies.vite, '^7.3.7');
         assert.equal(manifest.engines.node, '^20.19.0 || >=22.12.0');
         assert.equal(Boolean(manifest.dependencies.tailwindcss), template === 'tailwind');
