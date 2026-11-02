@@ -1,7 +1,7 @@
 import type { HeliumConfig } from "heliumts/server";
 
 const config: HeliumConfig = {
-  trustProxyDepth: 1, // Trust 1 proxy level (e.g., DigitalOcean, Netlify, etc.)
+  trustProxyDepth: 0, // Set the exact number of trusted reverse proxies for your deployment.
   rpc: {
     transport: "websocket",
     autoHttpOnMobile: false,

@@ -3,7 +3,7 @@ import { useFetch } from "heliumts/client";
 import { getTasks } from "heliumts/server";
 
 export default function Home() {
-  const { data: tasks, isLoading } = useFetch(getTasks, { status: "pending" });
+  const { data: tasks, isLoading, error } = useFetch(getTasks, { status: "pending" });
 
   return (
     <div>
@@ -15,7 +15,9 @@ export default function Home() {
       </div>
 
       <div className="card">
-        {isLoading ? (
+        {error ? (
+          <p role="alert">{error}</p>
+        ) : isLoading ? (
           <p>Loading tasks...</p>
         ) : tasks?.length ? (
           <>
@@ -44,8 +46,8 @@ export default function Home() {
         <div className="feature-card">
           <h3>🔒 Type Safe</h3>
           <p>
-            End-to-end type safety from server to client without code
-            generation.
+            Typed server methods and generated client declarations keep
+            requests and responses in sync.
           </p>
         </div>
         <div className="feature-card">

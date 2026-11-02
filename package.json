@@ -1,6 +1,6 @@
 {
   "name": "create-heliumts-app",
-  "version": "0.8.7",
+  "version": "0.9.6",
   "description": "Create HeliumTS apps with one command",
   "type": "module",
   "main": "src/index.js",
@@ -8,7 +8,7 @@
     "create-heliumts-app": "./bin/index.js"
   },
   "scripts": {
-    "test": "node bin/index.js test-app"
+    "test": "node --test test/scaffold.test.js"
   },
   "keywords": [
     "heliumts",
@@ -35,6 +35,6 @@
     "templates"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

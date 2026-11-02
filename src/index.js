@@ -61,12 +61,17 @@ const DOTFILE_RENAMES = {
     'prettierignore': '.prettierignore'
 };
 
+const COPY_EXCLUDES = new Set(['node_modules', 'dist', 'dist-ssr', '.git', '.DS_Store', '.vite', '.cache', 'coverage']);
+
 function copyDirectory(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
     
     const entries = fs.readdirSync(src, { withFileTypes: true });
     
     for (const entry of entries) {
+        if (COPY_EXCLUDES.has(entry.name)) {
+            continue;
+        }
         const srcPath = path.join(src, entry.name);
         const destName = DOTFILE_RENAMES[entry.name] || entry.name;
         const destPath = path.join(dest, destName);
@@ -85,15 +90,22 @@ function isDirectoryEmpty(dirPath) {
     }
     
     const files = fs.readdirSync(dirPath);
-    // Ignore hidden files like .git, .DS_Store
-    const visibleFiles = files.filter(f => !f.startsWith('.'));
-    return visibleFiles.length === 0;
+    // Preserve repository metadata, but never overwrite existing dotfiles.
+    return files.every(file => file === '.git' || file === '.DS_Store');
+}
+
+function quoteDirectory(directory) {
+    if (process.platform === 'win32') {
+        return '"' + directory.replace(/"/g, '""') + '"';
+    }
+    return "'" + directory.replace(/'/g, "'\\''") + "'";
 }
 
 function parseArgs(args) {
     const result = {
         projectName: null,
-        tailwind: null // null means ask, true means use tailwind, false means skip tailwind
+        tailwind: null, // null means ask, true means use tailwind, false means skip tailwind
+        skipInstall: false
     };
     
     for (const arg of args) {
@@ -101,6 +113,8 @@ function parseArgs(args) {
             result.tailwind = true;
         } else if (arg === '--no-tailwind') {
             result.tailwind = false;
+        } else if (arg === '--skip-install') {
+            result.skipInstall = true;
         } else if (!arg.startsWith('-')) {
             result.projectName = arg;
         }
@@ -114,7 +128,7 @@ export async function createApp() {
     
     // Get project name from command line arguments
     const args = process.argv.slice(2);
-    const { projectName, tailwind: tailwindFlag } = parseArgs(args);
+    const { projectName, tailwind: tailwindFlag, skipInstall } = parseArgs(args);
     
     if (!projectName) {
         logError('Please specify the project directory:');
@@ -198,29 +212,47 @@ export async function createApp() {
         const packageJsonPath = path.join(targetDir, 'package.json');
         if (fs.existsSync(packageJsonPath)) {
             const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-            packageJson.name = isCurrentDir ? path.basename(targetDir) : projectName;
+            packageJson.name = path.basename(targetDir)
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9._-]/g, '-')
+                .replace(/^[._]+/, '') || 'helium-app';
             fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
+            const packageLockPath = path.join(targetDir, 'package-lock.json');
+            if (fs.existsSync(packageLockPath)) {
+                const packageLock = JSON.parse(fs.readFileSync(packageLockPath, 'utf-8'));
+                packageLock.name = packageJson.name;
+                if (packageLock.packages?.['']) {
+                    packageLock.packages[''].name = packageJson.name;
+                }
+                fs.writeFileSync(packageLockPath, JSON.stringify(packageLock, null, 2) + '\n');
+            }
         }
         
         logSuccess('Project scaffolded successfully!');
         
-        // Install dependencies
-        console.log('');
-        logInfo('Installing dependencies...');
-        console.log('');
-        
-        try {
-            execSync('npm install', {
-                cwd: targetDir,
-                stdio: 'inherit'
-            });
+        // Install dependencies unless a separate package manager or offline setup was requested.
+        let dependenciesInstalled = false;
+        if (skipInstall) {
+            logInfo('Skipped dependency installation.');
+        } else {
             console.log('');
-            logSuccess('Dependencies installed successfully!');
-        } catch (error) {
-            logError('Failed to install dependencies.');
-            log('Please run "npm install" manually in the project directory.', COLORS.dim);
+            logInfo('Installing dependencies...');
+            console.log('');
+            try {
+                execSync('npm install', {
+                    cwd: targetDir,
+                    stdio: 'inherit'
+                });
+                dependenciesInstalled = true;
+                console.log('');
+                logSuccess('Dependencies installed successfully!');
+            } catch {
+                logError('Failed to install dependencies.');
+                log('Please run "npm install" manually in the project directory.', COLORS.dim);
+            }
         }
-        
+
         // Print success message
         console.log('');
         log('═══════════════════════════════════════════', COLORS.green);
@@ -232,7 +264,10 @@ export async function createApp() {
         console.log('');
         
         if (!isCurrentDir) {
-            log(`  cd ${projectName}`, COLORS.cyan);
+            log(`  cd ${quoteDirectory(projectName)}`, COLORS.cyan);
+        }
+        if (!dependenciesInstalled) {
+            log('  npm install', COLORS.cyan);
         }
         log('  npm run dev', COLORS.cyan);
         console.log('');

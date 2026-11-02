@@ -2,6 +2,10 @@
 
 This is a [HeliumTS](https://heliumts.com) project bootstrapped with `create-heliumts-app` using the Tailwind CSS template.
 
+## Requirements
+
+Use Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`). This template uses HeliumTS 0.9.6 and Vite 7.3.7 or later within Vite 7.
+
 ## Getting Started
 
 First, install the dependencies:
@@ -39,6 +43,35 @@ You can start using Tailwind utility classes in your components immediately.
 - `src/server` - Server-side logic and RPC functions.
 - `src/components` - React components.
 - `helium.config.ts` - HeliumTS configuration.
+
+## Rendering and Server Code
+
+Pages render in the browser by default. Add `"use ssg";` to static pages to render them during `npm run build`, or `"use ssr";` to render a page for each request.
+
+For SSR data, keep server code in a sidecar such as `src/pages/profile.server.ts`:
+
+```ts
+import type { GetServerSideProps } from "heliumts/server";
+
+export const getServerSideProps: GetServerSideProps = async (request) => {
+  return { name: request.query.name || "Visitor" };
+};
+```
+
+The matching `src/pages/profile.tsx` starts with `"use ssr";` and receives `name` as a prop. Sidecars stay out of the browser bundle. Layouts and `src/App.tsx` wrap browser, SSR, and static pages.
+
+RPC methods belong in `src/server`. Import their generated stubs from `heliumts/server` in pages, then call `useFetch` for queries or `useCall` for mutations. The Helium CLI refreshes `src/types/heliumts-server.d.ts`; do not edit generated declarations by hand.
+
+## Production
+
+```bash
+npm run build
+npm run typecheck
+npm run lint
+npm run start
+```
+
+Set a stable `HELIUM_SECRET` environment variable for production, shared by every server instance. Keep `trustProxyDepth: 0` for direct connections; set it to the exact number of trusted reverse proxies only when deploying behind them. Forwarded headers are not trusted by default.
 
 ## Learn More
 

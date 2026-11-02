@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "helium dev",
     "build": "helium build",
-    "start": "helium start"
+    "start": "helium start",
+    "typecheck": "tsc -b",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "heliumts": "^0.8.7",
+    "heliumts": "^0.9.6",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
@@ -25,6 +27,9 @@
     "globals": "^16.5.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.3.7"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

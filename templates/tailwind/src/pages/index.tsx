@@ -3,7 +3,7 @@ import { useFetch } from "heliumts/client";
 import { getTasks } from "heliumts/server";
 
 export default function Home() {
-  const { data: tasks, isLoading } = useFetch(getTasks, { status: "pending" });
+  const { data: tasks, isLoading, error } = useFetch(getTasks, { status: "pending" });
 
   return (
     <div className="max-w-5xl mx-auto p-8 text-center flex flex-col items-center gap-8">
@@ -20,7 +20,9 @@ export default function Home() {
       </div>
 
       <div className="p-8 bg-white/5 border border-white/10 rounded-xl w-full max-w-2xl">
-        {isLoading ? (
+        {error ? (
+          <p role="alert">{error}</p>
+        ) : isLoading ? (
           <p className="text-lg">Loading tasks...</p>
         ) : tasks?.length ? (
           <>
@@ -53,8 +55,8 @@ export default function Home() {
         <div className="p-6 rounded-xl bg-white border border-gray-300 text-left hover:border-teal-500/50 transition-colors">
           <h3 className="text-xl font-semibold mb-2">🔒 Type Safe</h3>
           <p className="opacity-80 text-sm">
-            End-to-end type safety from server to client without code
-            generation.
+            Typed server methods and generated client declarations keep
+            requests and responses in sync.
           </p>
         </div>
         <div className="p-6 rounded-xl bg-white border border-gray-300 text-left hover:border-teal-500/50 transition-colors">
