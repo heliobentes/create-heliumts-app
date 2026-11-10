@@ -1,81 +1,66 @@
 # create-heliumts-app
 
-Create [HeliumTS](https://github.com/heliobentes/heliumts) apps with one command.
+Scaffold a React + TypeScript HeliumTS app with typed HTTP RPC.
+Requires Node.js ^20.19.0 or >=22.12.0.
 
-## Usage
-
-```bash
-npx create-heliumts-app my-app
-```
-
-Or to scaffold in the current directory:
-
-```bash
-npx create-heliumts-app .
-```
-
-### Options
-
-| Flag | Description |
-|------|-------------|
-| `--tailwind` | Use Tailwind CSS template (skips prompt) |
-| `--no-tailwind` | Use basic template without Tailwind (skips prompt) |
-| `--skip-install` | Scaffold files without running npm install |
-
-```bash
-# Use Tailwind CSS (default, skips prompt)
-npx create-heliumts-app my-app --tailwind
-
-# Use basic template without Tailwind (skips prompt)
-npx create-heliumts-app my-app --no-tailwind
-```
-
-## What it does
-
-1. Asks if you want to use **Tailwind CSS** (defaults to Yes)
-2. Scaffolds a complete HeliumTS project with one of two templates:
-   - `tailwind` - HeliumTS with Tailwind CSS pre-configured (default)
-   - `basic` - Standard HeliumTS setup
-3. Automatically runs `npm install` unless `--skip-install` is provided.
-
-Both templates use HeliumTS 0.10.2 and Vite 7.3.7 or later within Vite 7. Open `/streaming` in the generated app for a typed HTTP streaming demo with restart, cancellation, and partial errors; it needs no external provider or credentials.
-Existing project files, including dotfiles, are protected from overwrite; `.git` and `.DS_Store` may remain in an otherwise empty directory.
-
-To install with another package manager:
-
-```bash
-npx create-heliumts-app my-app --no-tailwind --skip-install
-cd my-app
-pnpm install
-```
-
-## Requirements
-
-- Node.js 20.19 or later on Node 20, or Node.js 22.12 or later (`^20.19.0 || >=22.12.0`)
-- npm to run the scaffolder; npm, yarn, or pnpm can install the generated app
-
-## After Installation
-
-```bash
+```sh
+npm create heliumts-app@latest my-app
 cd my-app
 npm run dev
 ```
 
-## Available Scripts
+The minimal starter has one page and one typed RPC method. Use `npm create heliumts-app@latest my-app -- --template examples` for the tasks, routing, and streaming demo. These defaults apply to version 0.11.0.
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run typecheck` | Check application and configuration types |
-| `npm run lint` | Check source code with ESLint |
+Agents: read the generated AGENTS.md and the installed one-read startup context, then use npm run verify. The normal starter does not initialize experimental project memory.
 
-## Learn More
+`--skip-install` writes no lockfile; `npm install` creates the project lock from the actual published dependencies.
 
-- [HeliumTS Documentation](https://heliumts.com/docs)
-- [HeliumTS GitHub](https://github.com/heliobentes/heliumts)
+## CLI
 
-## License
+```
+create-heliumts-app <directory> [options]
+--template minimal|examples  Starter (default: minimal)
+--tailwind                  Tailwind CSS
+--no-tailwind               Plain CSS (default)
+--skip-install              Do not run npm install
+--json                      One JSON result; npm logs go to stderr
+-h, --help                  Usage
+-v, --version               Version
+```
 
-MIT
+No prompts are used, including in non-TTY/CI runs. Existing `--tailwind`,
+`--no-tailwind`, `--skip-install`, and current-directory (`.`) usage work.
+Unknown, repeated, conflicting flags and extra positionals fail before writes.
+Use `--` before a directory beginning with `-`.
+An existing directory must be empty except for `.git` and `.DS_Store`.
+
+Successful scaffolding exits 0; failed validation, filesystem operations, or
+installation exit 1. Installation failure keeps the scaffold for retry and does
+not claim the app is ready. `--skip-install` succeeds with
+`dependenciesInstalled: false`. JSON results include `ok`, `scaffolded`, and
+`dependenciesInstalled`; successful scaffolds also include directory, template,
+style, and next steps.
+
+## Generated project
+
+- Minimal: one page, one RPC method, stylesheet, and configuration.
+- Examples: the existing tasks and HTTP streaming demo.
+- Both styles include `AGENTS.md` and `npm run verify` for check → lint → production build, stopping on failure.
+- Starter pages import typed method references from `src/rpc.generated.ts`. `npm run dev` and `npm run build` generate this module automatically.
+- `npm run check` generates the RPC module, then checks TypeScript. Verify already includes this work; use typegen/typecheck separately only for focused tasks.
+- `npm run lint` checks lint; `npm run build` builds production assets.
+
+The generated RPC module and the `helium check` and `helium typegen` commands require the coordinated framework release. During development, use a matching local framework build.
+
+## Development
+
+```sh
+npm test
+```
+
+Templates compose `templates/base`, `templates/starters/<name>`, and optional
+style overlays. Shared configuration lives once; example-specific Tailwind
+markup stays in `examples-tailwind`. Source-checkout lockfiles are retained per
+dependency set and renamed along with the generated package. As before, the npm
+distribution excludes them; installation creates a fresh lockfile. Tests cover all four starter/style
+combinations, CLI errors, non-TTY behavior, and installation failure.

@@ -1,288 +1,133 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as readline from 'readline';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const root = fileURLToPath(new URL('../', import.meta.url));
+const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).version;
+const HELP = `Usage: create-heliumts-app <directory> [options]
 
-const COLORS = {
-    reset: '\x1b[0m',
-    bright: '\x1b[1m',
-    dim: '\x1b[2m',
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    blue: '\x1b[34m',
-    magenta: '\x1b[35m',
-    cyan: '\x1b[36m',
-    white: '\x1b[37m'
-};
+  --template <minimal|examples>  Starter (default: minimal)
+  --tailwind                    Use Tailwind CSS
+  --no-tailwind                 Use plain CSS (default)
+  --skip-install                Scaffold without running npm install
+  --json                        Emit one JSON result; install output goes to stderr
+  -h, --help                    Show help
+  -v, --version                 Show version
 
-function log(message, color = '') {
-    console.log(`${color}${message}${COLORS.reset}`);
-}
+No prompts are used. Non-interactive runs use the same defaults.
+Example: npx create-heliumts-app my-app --template examples`;
 
-function logSuccess(message) {
-    log(`✓ ${message}`, COLORS.green);
-}
-
-function logError(message) {
-    log(`✗ ${message}`, COLORS.red);
-}
-
-function logInfo(message) {
-    log(`ℹ ${message}`, COLORS.cyan);
-}
-
-function printBanner() {
-    console.log('');
-    log('╔═══════════════════════════════════════════╗', COLORS.cyan);
-    log('║                                           ║', COLORS.cyan);
-    log('║        🚀 Create HeliumTS App 🚀          ║', COLORS.cyan);
-    log('║                                           ║', COLORS.cyan);
-    log('╚═══════════════════════════════════════════╝', COLORS.cyan);
-    console.log('');
-}
-
-function askQuestion(rl, question) {
-    return new Promise((resolve) => {
-        rl.question(question, (answer) => {
-            resolve(answer.trim());
-        });
-    });
-}
-
-// Files that need to be renamed from 'name' to '.name' (npm doesn't include dotfiles in packages)
-const DOTFILE_RENAMES = {
-    'gitignore': '.gitignore',
-    'prettierrc': '.prettierrc',
-    'prettierignore': '.prettierignore'
-};
-
-const COPY_EXCLUDES = new Set(['node_modules', 'dist', 'dist-ssr', '.git', '.DS_Store', '.vite', '.cache', 'coverage']);
-
-function copyDirectory(src, dest) {
-    fs.mkdirSync(dest, { recursive: true });
-    
-    const entries = fs.readdirSync(src, { withFileTypes: true });
-    
-    for (const entry of entries) {
-        if (COPY_EXCLUDES.has(entry.name)) {
-            continue;
-        }
-        const srcPath = path.join(src, entry.name);
-        const destName = DOTFILE_RENAMES[entry.name] || entry.name;
-        const destPath = path.join(dest, destName);
-        
-        if (entry.isDirectory()) {
-            copyDirectory(srcPath, destPath);
+export function parseArgs(args) {
+    const result = { projectName: null, template: 'minimal', tailwind: false, skipInstall: false, json: false };
+    const seen = new Set();
+    let positionalOnly = false;
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        if (!positionalOnly && arg === '--') { positionalOnly = true; continue; }
+        if (!positionalOnly && arg.startsWith('-')) {
+            const key = ({ '-h': '--help', '-v': '--version', '--no-tailwind': '--tailwind' })[arg] || arg;
+            if (seen.has(key)) throw new Error(`Duplicate or conflicting option: ${arg}`);
+            seen.add(key);
+            switch (arg) {
+                case '-h': case '--help': result.help = true; break;
+                case '-v': case '--version': result.version = true; break;
+                case '--tailwind': result.tailwind = true; break;
+                case '--no-tailwind': result.tailwind = false; break;
+                case '--skip-install': result.skipInstall = true; break;
+                case '--json': result.json = true; break;
+                case '--template': {
+                    const value = args[++i];
+                    if (!['examples', 'minimal'].includes(value)) throw new Error('--template requires examples or minimal');
+                    result.template = value;
+                    break;
+                }
+                default: throw new Error(`Unknown option: ${arg}`);
+            }
         } else {
-            fs.copyFileSync(srcPath, destPath);
-        }
-    }
-}
-
-function isDirectoryEmpty(dirPath) {
-    if (!fs.existsSync(dirPath)) {
-        return true;
-    }
-    
-    const files = fs.readdirSync(dirPath);
-    // Preserve repository metadata, but never overwrite existing dotfiles.
-    return files.every(file => file === '.git' || file === '.DS_Store');
-}
-
-function quoteDirectory(directory) {
-    if (process.platform === 'win32') {
-        return '"' + directory.replace(/"/g, '""') + '"';
-    }
-    return "'" + directory.replace(/'/g, "'\\''") + "'";
-}
-
-function parseArgs(args) {
-    const result = {
-        projectName: null,
-        tailwind: null, // null means ask, true means use tailwind, false means skip tailwind
-        skipInstall: false
-    };
-    
-    for (const arg of args) {
-        if (arg === '--tailwind') {
-            result.tailwind = true;
-        } else if (arg === '--no-tailwind') {
-            result.tailwind = false;
-        } else if (arg === '--skip-install') {
-            result.skipInstall = true;
-        } else if (!arg.startsWith('-')) {
+            if (result.projectName !== null) throw new Error('Expected exactly one project directory');
+            if (!arg.trim()) throw new Error('Project directory must not be empty');
             result.projectName = arg;
         }
     }
-    
+    if (result.help && result.version) throw new Error('Choose --help or --version');
+    if (!result.help && !result.version && result.projectName === null) throw new Error('Specify a project directory. Use --help for usage.');
     return result;
 }
 
-export async function createApp() {
-    printBanner();
-    
-    // Get project name from command line arguments
-    const args = process.argv.slice(2);
-    const { projectName, tailwind: tailwindFlag, skipInstall } = parseArgs(args);
-    
-    if (!projectName) {
-        logError('Please specify the project directory:');
-        console.log('');
-        log('  npx create-heliumts-app <project-directory>', COLORS.dim);
-        console.log('');
-        log('For example:', COLORS.dim);
-        log('  npx create-heliumts-app my-helium-app', COLORS.dim);
-        log('  npx create-heliumts-app my-helium-app --tailwind', COLORS.dim);
-        log('  npx create-heliumts-app .', COLORS.dim);
-        console.log('');
-        process.exit(1);
-    }
-    
-    // Resolve the target directory
-    const isCurrentDir = projectName === '.';
-    const targetDir = isCurrentDir 
-        ? process.cwd() 
-        : path.resolve(process.cwd(), projectName);
-    
-    const displayName = isCurrentDir ? 'current directory' : projectName;
-    
-    // Check if directory is empty
-    if (!isDirectoryEmpty(targetDir)) {
-        logError(`The directory "${displayName}" is not empty.`);
-        log('Please choose an empty directory or remove existing files.', COLORS.dim);
-        console.log('');
-        process.exit(1);
-    }
-    
-    // Create readline interface for user input
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-    
-    try {
-        // Determine if we should use Tailwind
-        let useTailwind;
-        
-        if (tailwindFlag !== null) {
-            // Flag was provided, use it directly
-            useTailwind = tailwindFlag;
-            log(`Creating a new HeliumTS app in ${COLORS.cyan}${targetDir}${COLORS.reset}`);
-            console.log('');
-            logInfo(`Using ${useTailwind ? 'Tailwind CSS' : 'basic'} template (from flag)...`);
-        } else {
-            // Ask the user
-            log(`Creating a new HeliumTS app in ${COLORS.cyan}${targetDir}${COLORS.reset}`);
-            console.log('');
-            
-            const tailwindAnswer = await askQuestion(
-                rl, 
-                `${COLORS.yellow}?${COLORS.reset} Do you want to use Tailwind CSS? ${COLORS.dim}(Y/n)${COLORS.reset} `
-            );
-            
-            // Default is YES (Tailwind)
-            useTailwind = tailwindAnswer.toLowerCase() !== 'n' && tailwindAnswer.toLowerCase() !== 'no';
-            console.log('');
-            logInfo(`Using ${useTailwind ? 'Tailwind CSS' : 'basic'} template...`);
-        }
-        
-        const templateName = useTailwind ? 'tailwind' : 'basic';
-        
-        // Get template path
-        const templatesDir = path.join(__dirname, '..', 'templates');
-        const templatePath = path.join(templatesDir, templateName);
-        
-        // Check if template exists
-        if (!fs.existsSync(templatePath)) {
-            logError(`Template "${templateName}" not found at ${templatePath}`);
-            log('Please make sure the templates are properly installed.', COLORS.dim);
-            process.exit(1);
-        }
-        
-        // Copy template to target directory
-        logInfo('Scaffolding project...');
-        copyDirectory(templatePath, targetDir);
-        
-        // Update package.json with project name
-        const packageJsonPath = path.join(targetDir, 'package.json');
-        if (fs.existsSync(packageJsonPath)) {
-            const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-            packageJson.name = path.basename(targetDir)
-                .toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^a-z0-9._-]/g, '-')
-                .replace(/^[._]+/, '') || 'helium-app';
-            fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
-            const packageLockPath = path.join(targetDir, 'package-lock.json');
-            if (fs.existsSync(packageLockPath)) {
-                const packageLock = JSON.parse(fs.readFileSync(packageLockPath, 'utf-8'));
-                packageLock.name = packageJson.name;
-                if (packageLock.packages?.['']) {
-                    packageLock.packages[''].name = packageJson.name;
-                }
-                fs.writeFileSync(packageLockPath, JSON.stringify(packageLock, null, 2) + '\n');
+const renames = { gitignore: '.gitignore', prettierrc: '.prettierrc', prettierignore: '.prettierignore' };
+const excludes = new Set(['node_modules', 'dist', 'dist-ssr', '.git', '.DS_Store', '.vite', '.cache', 'coverage', 'package-lock.json']);
+function copyDirectory(src, dest) {
+    fs.mkdirSync(dest, { recursive: true });
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+        if (excludes.has(entry.name)) continue;
+        const from = path.join(src, entry.name);
+        const to = path.join(dest, renames[entry.name] || entry.name);
+        if (entry.isDirectory()) copyDirectory(from, to);
+        else if (entry.name === 'package.json' && fs.existsSync(to)) {
+            const base = JSON.parse(fs.readFileSync(to, 'utf8'));
+            const overlay = JSON.parse(fs.readFileSync(from, 'utf8'));
+            for (const [key, value] of Object.entries(overlay)) {
+                base[key] = typeof value === 'object' && !Array.isArray(value) ? { ...base[key], ...value } : value;
             }
-        }
-        
-        logSuccess('Project scaffolded successfully!');
-        
-        // Install dependencies unless a separate package manager or offline setup was requested.
-        let dependenciesInstalled = false;
-        if (skipInstall) {
-            logInfo('Skipped dependency installation.');
-        } else {
-            console.log('');
-            logInfo('Installing dependencies...');
-            console.log('');
-            try {
-                execSync('npm install', {
-                    cwd: targetDir,
-                    stdio: 'inherit'
-                });
-                dependenciesInstalled = true;
-                console.log('');
-                logSuccess('Dependencies installed successfully!');
-            } catch {
-                logError('Failed to install dependencies.');
-                log('Please run "npm install" manually in the project directory.', COLORS.dim);
-            }
-        }
+            fs.writeFileSync(to, JSON.stringify(base, null, 2) + '\n');
+        } else fs.copyFileSync(from, to);
+    }
+}
 
-        // Print success message
-        console.log('');
-        log('═══════════════════════════════════════════', COLORS.green);
-        logSuccess('Your HeliumTS app is ready!');
-        log('═══════════════════════════════════════════', COLORS.green);
-        console.log('');
-        
-        log('Next steps:', COLORS.bright);
-        console.log('');
-        
-        if (!isCurrentDir) {
-            log(`  cd ${quoteDirectory(projectName)}`, COLORS.cyan);
+function quoteDirectory(directory) {
+    return process.platform === 'win32' ? '"' + directory.replace(/"/g, '""') + '"' : "'" + directory.replace(/'/g, "'\\''") + "'";
+}
+
+export async function createApp(args = process.argv.slice(2)) {
+    let options;
+    let targetDir;
+    let scaffolded = false;
+    const terminator = args.indexOf('--');
+    const json = (terminator === -1 ? args : args.slice(0, terminator)).includes('--json');
+    try {
+        options = parseArgs(args);
+        if (options.help || options.version) {
+            console.log(options.json ? JSON.stringify(options.help ? { help: HELP } : { version }) : options.help ? HELP : version);
+            return;
         }
-        if (!dependenciesInstalled) {
-            log('  npm install', COLORS.cyan);
+        targetDir = path.resolve(options.projectName);
+        if (fs.existsSync(targetDir) && (!fs.statSync(targetDir).isDirectory() || fs.readdirSync(targetDir).some(name => !['.git', '.DS_Store'].includes(name)))) {
+            throw new Error(`The directory "${options.projectName}" is not empty or is not a directory.`);
         }
-        log('  npm run dev', COLORS.cyan);
-        console.log('');
-        
-        log('Available commands:', COLORS.bright);
-        console.log('');
-        log('  npm run dev     - Start development server', COLORS.dim);
-        log('  npm run build   - Build for production', COLORS.dim);
-        log('  npm run start   - Start production server', COLORS.dim);
-        console.log('');
-        
-        log('Happy coding! 🎉', COLORS.magenta);
-        console.log('');
-        
-    } finally {
-        rl.close();
+        const templates = path.join(root, 'templates');
+        copyDirectory(path.join(templates, 'base'), targetDir);
+        copyDirectory(path.join(templates, 'starters', options.template), targetDir);
+        if (options.tailwind) {
+            copyDirectory(path.join(templates, 'styles', 'tailwind'), targetDir);
+            if (options.template === 'examples') copyDirectory(path.join(templates, 'starters', 'examples-tailwind'), targetDir);
+            else {
+                const css = path.join(targetDir, 'src/styles.css');
+                fs.writeFileSync(css, '@import "tailwindcss";\n' + fs.readFileSync(css, 'utf8'));
+            }
+        }
+        const manifestPath = path.join(targetDir, 'package.json');
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        manifest.name = path.basename(targetDir).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9._-]/g, '-').replace(/^[._]+/, '') || 'helium-app';
+        fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+        scaffolded = true;
+        if (!options.skipInstall) {
+            const installed = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install'], {
+                cwd: targetDir, stdio: options.json ? ['ignore', 2, 2] : 'inherit', shell: process.platform === 'win32',
+            });
+            if (installed.error || installed.status !== 0) throw new Error('Dependency installation failed. Project files were created; run npm install in the project directory to retry.');
+        }
+        const nextSteps = [
+            ...(options.projectName === '.' ? [] : [`cd ${quoteDirectory(options.projectName.startsWith('-') ? `./${options.projectName}` : options.projectName)}`]),
+            ...(options.skipInstall ? ['npm install'] : []),
+            'npm run dev',
+        ];
+        if (options.json) console.log(JSON.stringify({ ok: true, directory: targetDir, template: options.template, style: options.tailwind ? 'tailwind' : 'css', scaffolded, dependenciesInstalled: !options.skipInstall, nextSteps }));
+        else console.log(`Project scaffolded in ${targetDir}.\n${options.skipInstall ? 'Skipped dependency installation.' : 'Dependencies installed.'}\n\nNext steps:\n  ${nextSteps.join('\n  ')}`);
+    } catch (error) {
+        process.exitCode = 1;
+        const message = error instanceof Error ? error.message : String(error);
+        if (json) console.log(JSON.stringify({ ok: false, error: message, ...(targetDir ? { directory: targetDir } : {}), scaffolded, dependenciesInstalled: false }));
+        else console.error(`Error: ${message}`);
     }
 }
