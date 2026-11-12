@@ -11,7 +11,7 @@ npm run dev
 
 The minimal starter has one page and one typed RPC method. Use `npm create heliumts-app@latest my-app -- --template examples` for the tasks, routing, and streaming demo. These defaults apply to version 0.11.0.
 
-Agents: read the generated AGENTS.md and the installed one-read startup context, then use npm run verify. The normal starter does not initialize experimental project memory.
+Agents: read the generated AGENTS.md and the installed one-read startup context, then use npm run verify.
 
 `--skip-install` writes no lockfile; `npm install` creates the project lock from the actual published dependencies.
 
