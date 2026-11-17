@@ -14,7 +14,7 @@
     "inspect": "helium inspect --json"
   },
   "dependencies": {
-    "heliumts": "^0.11.0",
+    "heliumts": "^0.11.1",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },

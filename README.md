@@ -9,7 +9,7 @@ cd my-app
 npm run dev
 ```
 
-The minimal starter has one page and one typed RPC method. Use `npm create heliumts-app@latest my-app -- --template examples` for the tasks, routing, and streaming demo. These defaults apply to version 0.11.0.
+The minimal starter has one page and one typed RPC method. Use `npm create heliumts-app@latest my-app -- --template examples` for the tasks, routing, and streaming demo. These defaults apply to scaffolder version 0.11.0 and later. Version 0.11.1 generates apps with HeliumTS 0.11.1 or a compatible patch release.
 
 Agents: read the generated AGENTS.md and the installed one-read startup context, then use npm run verify.
 
